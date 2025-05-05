@@ -1,22 +1,16 @@
 #!/bin/bash
 
-# Start Xvfb
+# Start virtual display
 Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset &
 
 # Start window manager
 fluxbox &
 
-# Start VNC server
-x11vnc -forever -shared -nopw -display :99 -localhost &
+# Start VNC server without password
+x11vnc -forever -shared -nopw -display :99 &
 
-# Start websockify
-/opt/novnc/utils/websockify --web /opt/novnc 5901 localhost:5900 &
-
-# Verify noVNC files
-if [ ! -f "/opt/novnc/vnc.html" ]; then
-    echo "ERROR: noVNC files missing!"
-    exit 1
-fi
+# Start noVNC without authentication
+/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 --heartbeat 10 &
 
 # Start Flask app
 gunicorn -w 4 -b 0.0.0.0:5000 linkedin_bot:app
