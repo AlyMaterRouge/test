@@ -11,7 +11,15 @@ x11vnc -forever -shared -nopw -display :99 &
 
 # Start noVNC without authentication
 # use the PORT env that Render sets
-/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen $PORT
+# Serve /opt/novnc as static under /novnc, proxy WS at /novnc/websockify
+/opt/novnc/utils/novnc_proxy \
+  --web /opt/novnc \
+  --wrap-mode=once \
+  --web=/opt/novnc \
+  --ws-path /novnc/websockify \
+  --vnc localhost:5900 \
+  --listen $PORT
+
 
 
 # Start Flask app
