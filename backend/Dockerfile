@@ -43,9 +43,10 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Set environment variables
+# Add these environment variables
 ENV DISPLAY=:99
 ENV VNC_PORT=5900
-ENV NOVNC_PORT=6080
+ENV FLASK_PORT=5000
 
 # Expose ports
 EXPOSE 5000 5900 6080
