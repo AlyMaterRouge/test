@@ -1,7 +1,7 @@
 import time
 import os, uuid, logging, requests, json, threading
 from urllib.parse import urlencode
-from flask import Flask, request, jsonify, send_from_directory, make_response
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -302,15 +302,6 @@ class BotManager:
         self.running = False
         self.thread.join(timeout=5)
         return True
-        
-@app.route('/novnc/')
-@app.route('/novnc/<path:filename>')
-def serve_novnc(filename='vnc.html'):
-    novnc_path = '/opt/novnc'
-    try:
-        return send_from_directory(novnc_path, filename)
-    except FileNotFoundError:
-        abort(404)
 
 @app.route('/start_bot', methods=['POST'])
 def start_bot():
