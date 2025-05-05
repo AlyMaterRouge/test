@@ -304,13 +304,20 @@ class BotManager:
         return True
         
 @app.route('/novnc/')
-def novnc_proxy():
-    content = open('/opt/novnc/vnc.html').read()
-    # Replace WebSocket URL to use the same port as Flask
+def serve_novnc():
+    # Read and modify the vnc.html file
+    with open('/opt/novnc/vnc.html', 'r') as f:
+        content = f.read()
+    
+    # Force WebSocket connection to use the same HTTPS domain
     content = content.replace(
-        'websockify = new WebSocket(', 
-        'websockify = new WebSocket(`wss://${window.location.host}`); //'
+        'host = window.location.hostname;',
+        f'host = "{os.getenv("RENDER_EXTERNAL_HOSTNAME", "repostig-backend.onrender.com")};'
+    ).replace(
+        'port = 6080;',
+        'port = window.location.port || (window.location.protocol === "https:" ? 443 : 80);'
     )
+    
     response = make_response(content)
     response.headers['Content-Type'] = 'text/html'
     return response
