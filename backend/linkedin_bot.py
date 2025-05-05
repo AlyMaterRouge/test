@@ -304,23 +304,13 @@ class BotManager:
         return True
         
 @app.route('/novnc/')
-def serve_novnc():
-    # Read and modify the vnc.html file
-    with open('/opt/novnc/vnc.html', 'r') as f:
-        content = f.read()
-    
-    # Force WebSocket connection to use the same HTTPS domain
-    content = content.replace(
-        'host = window.location.hostname;',
-        f'host = "{os.getenv("RENDER_EXTERNAL_HOSTNAME", "repostig-backend.onrender.com")};'
-    ).replace(
-        'port = 6080;',
-        'port = window.location.port || (window.location.protocol === "https:" ? 443 : 80);'
-    )
-    
-    response = make_response(content)
-    response.headers['Content-Type'] = 'text/html'
-    return response
+@app.route('/novnc/<path:filename>')
+def serve_novnc(filename='vnc.html'):
+    novnc_path = '/opt/novnc'
+    try:
+        return send_from_directory(novnc_path, filename)
+    except FileNotFoundError:
+        abort(404)
 
 @app.route('/start_bot', methods=['POST'])
 def start_bot():
