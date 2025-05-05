@@ -1,7 +1,7 @@
 import time
 import os, uuid, logging, requests, json, threading
 from urllib.parse import urlencode
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, make_response
 from flask_cors import CORS
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -304,13 +304,16 @@ class BotManager:
         return True
         
 @app.route('/novnc/')
-@app.route('/novnc/<path:filename>')
-def serve_novnc(filename='vnc.html'):
-    novnc_path = '/opt/novnc'
-    try:
-        return send_from_directory(novnc_path, filename)
-    except FileNotFoundError:
-        abort(404)
+def novnc_proxy():
+    content = open('/opt/novnc/vnc.html').read()
+    # Replace WebSocket URL to use the same port as Flask
+    content = content.replace(
+        'websockify = new WebSocket(', 
+        'websockify = new WebSocket(`wss://${window.location.host}`); //'
+    )
+    response = make_response(content)
+    response.headers['Content-Type'] = 'text/html'
+    return response
 
 @app.route('/start_bot', methods=['POST'])
 def start_bot():
