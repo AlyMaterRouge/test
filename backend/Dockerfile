@@ -28,36 +28,31 @@ COPY . .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt flask-cors gunicorn
 
-# Configure NGINX reverse proxy
+# Configure NGINX reverse proxy using echo statements
 RUN rm /etc/nginx/sites-enabled/default && \
-    cat << 'EOF' > /etc/nginx/conf.d/reverse.conf
-server {
-    listen 80;
-
-    # Proxy API requests to Flask
-    location /api/ {
-        rewrite ^/api/(.*)$ /$1 break;
-        proxy_pass http://127.0.0.1:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-
-    # Serve noVNC client and proxy WebSocket connections
-    location /vnc/ {
-        proxy_pass http://127.0.0.1:6080/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
-
-    # Fallback for other paths
-    location / {
-        return 404;
-    }
-}
-EOF
+    echo 'server {' > /etc/nginx/conf.d/reverse.conf && \
+    echo '    listen 80;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '    # Proxy API requests to Flask' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '    location /api/ {' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        rewrite ^/api/(.*)$ /$1 break;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        proxy_pass http://127.0.0.1:5000;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        proxy_http_version 1.1;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        proxy_set_header Host $host;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '    }' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '    # Serve noVNC client and proxy WebSocket connections' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '    location /vnc/ {' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        proxy_pass http://127.0.0.1:6080/;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        proxy_http_version 1.1;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        proxy_set_header Upgrade $http_upgrade;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        proxy_set_header Connection "upgrade";' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '    }' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '    # Fallback for other paths' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '    location / {' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '        return 404;' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '    }' >> /etc/nginx/conf.d/reverse.conf && \
+    echo '}' >> /etc/nginx/conf.d/reverse.conf
 
 # Expose port 80 for HTTP
 EXPOSE 80
