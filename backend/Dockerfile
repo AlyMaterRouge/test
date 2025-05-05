@@ -34,6 +34,9 @@ RUN apt-get update && \
 # Install noVNC
 RUN git clone https://github.com/novnc/noVNC.git /opt/novnc && \
     git clone https://github.com/novnc/websockify /opt/novnc/utils/websockify
+# Add this after the noVNC installation
+RUN mkdir -p /opt/novnc && \
+    chmod -R 755 /opt/novnc
 
 WORKDIR /usr/src/app
 COPY . .
