@@ -14,7 +14,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import quote_plus
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/*": {"origins": "http://172.30.192.1:3000 "}})
 
 logging.basicConfig(level=logging.DEBUG)
 
