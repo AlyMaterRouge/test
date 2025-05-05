@@ -33,9 +33,9 @@ WORKDIR /usr/src/app
 COPY . .
 
 # 4. Install Python deps (including webdriver_manager)
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # 5. Expose and launch
 EXPOSE 5000
-ENV FLASK_APP=linkedin_bot.py
-CMD ["flask", "run", "--host=0.0.0.0"]
+
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "linkedin_bot:app"]
