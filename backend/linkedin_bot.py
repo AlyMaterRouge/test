@@ -14,7 +14,15 @@ from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import quote_plus
 
 app = Flask(__name__)
-CORS(app)
+# Allow your React dev server and (optionally) your production domain:
+CORS(
+    app,
+    resources={r"/*": {"origins": ["http://localhost:3000", "https://repostig-backend.onrender.com"]}},
+    methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+    supports_credentials=False  # or True if you need cookies/auth headers
+)
+
 
 logging.basicConfig(level=logging.DEBUG)
 
