@@ -121,7 +121,7 @@ class LinkedInBot:
         except Exception as e:
             logging.error(f"Failed saving history: {e}")
 
-     def setup_browser(self):
+    def setup_browser(self):
         options = webdriver.ChromeOptions()
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
@@ -129,7 +129,7 @@ class LinkedInBot:
         
         service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=service, options=options)
-        self.wait = WebDriverWait(self.driver, 100)  # 5-minute timeout
+        self.wait = WebDriverWait(self.driver, 300)  # 5-minute timeout
 
     def login(self):
         logging.info("Logging into LinkedIn via Selenium...")
