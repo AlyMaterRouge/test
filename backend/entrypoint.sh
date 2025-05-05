@@ -12,5 +12,11 @@ x11vnc -forever -shared -nopw -display :99 -localhost -rfbport 5900 &
 # Start websockify in the background
 /opt/novnc/utils/websockify --web /opt/novnc 5901 localhost:5900 &
 
+# Check noVNC files exist
+if [ ! -f "/opt/novnc/vnc.html" ]; then
+    echo "ERROR: noVNC files not found!"
+    exit 1
+fi
+
 # Start Flask app
 gunicorn -w 4 -b 0.0.0.0:5000 linkedin_bot:app
