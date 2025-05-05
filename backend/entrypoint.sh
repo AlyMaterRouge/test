@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Start virtual display
+# Start Xvfb
 Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset &
 
 # Start window manager
 fluxbox &
 
-# Start VNC server without password
-x11vnc -forever -shared -nopw -display :99 &
+# Start VNC server (no password, localhost-only)
+x11vnc -forever -shared -nopw -display :99 -localhost -rfbport 5900 &
 
-# Start noVNC without authentication
-/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 --heartbeat 10 &
+# Start websockify in the background
+/opt/novnc/utils/websockify --web /opt/novnc 5901 localhost:5900 &
 
 # Start Flask app
 gunicorn -w 4 -b 0.0.0.0:5000 linkedin_bot:app
