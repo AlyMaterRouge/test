@@ -10,7 +10,9 @@ fluxbox &
 x11vnc -forever -shared -nopw -display :99 &
 
 # Start noVNC without authentication
-/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 --heartbeat 10 &
+# use the PORT env that Render sets
+/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen $PORT
+
 
 # Start Flask app
 gunicorn -w 4 -b 0.0.0.0:5000 linkedin_bot:app
