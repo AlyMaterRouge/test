@@ -10,7 +10,7 @@ RUN apt-get update && \
       libxfixes3 nginx && \
     rm -rf /var/lib/apt/lists/*
 
-# Add Google Chrome for headless Selenium if needed
+# Install Google Chrome for Selenium (if needed)
 RUN wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
     echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
     apt-get update && \
@@ -21,19 +21,20 @@ RUN wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key ad
 RUN git clone https://github.com/novnc/noVNC.git /opt/novnc && \
     git clone https://github.com/novnc/websockify /opt/novnc/utils/websockify
 
-# Set workdir and copy application
+# Set working directory and copy application code
 WORKDIR /usr/src/app
 COPY . .
 
-# Install Python deps
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt flask-cors gunicorn
 
-# Configure NGINX for reverse proxy
+# Configure NGINX reverse proxy
 RUN rm /etc/nginx/sites-enabled/default && \
-    cat > /etc/nginx/conf.d/reverse.conf << 'EOF'
+    cat << 'EOF' > /etc/nginx/conf.d/reverse.conf
 server {
     listen 80;
-    # API endpoints
+
+    # Proxy API requests to Flask
     location /api/ {
         rewrite ^/api/(.*)$ /$1 break;
         proxy_pass http://127.0.0.1:5000;
@@ -42,24 +43,26 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
-    # noVNC client and websocket
+
+    # Serve noVNC client and proxy WebSocket connections
     location /vnc/ {
         proxy_pass http://127.0.0.1:6080/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
     }
-    # static root fallback (optional)
+
+    # Fallback for other paths
     location / {
         return 404;
     }
 }
 EOF
 
-# Expose port 80 (HTTP for both API and noVNC)
+# Expose port 80 for HTTP
 EXPOSE 80
 
-# Copy and make entrypoint executable
+# Copy and set entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
