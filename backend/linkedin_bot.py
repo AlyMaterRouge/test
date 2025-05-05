@@ -302,6 +302,14 @@ class BotManager:
         self.running = False
         self.thread.join(timeout=5)
         return True
+        
+@app.route('/novnc/')
+@app.route('/novnc/<path:filename>')
+def serve_novnc(filename='vnc.html'):
+    novnc_path = '/opt/novnc'
+    if not os.path.exists(os.path.join(novnc_path, filename)):
+        abort(404)
+    return send_from_directory(novnc_path, filename)
 
 @app.route('/start_bot', methods=['POST'])
 def start_bot():
