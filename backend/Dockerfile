@@ -25,7 +25,10 @@ COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Start Xvfb on display :99
 ENV DISPLAY=:99
-EXPOSE 5000  # Only expose Flask (noVNC will run on same port via path)
+
+# Only expose Flask’s port for external traffic
+EXPOSE 5000
 
 CMD ["/entrypoint.sh"]
