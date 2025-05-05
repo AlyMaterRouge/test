@@ -14,7 +14,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import quote_plus
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://repostig-backend.onrender.com"]}})
+CORS(app)
 
 logging.basicConfig(level=logging.DEBUG)
 
