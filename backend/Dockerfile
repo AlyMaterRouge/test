@@ -1,12 +1,12 @@
-# 1. Base image
 FROM python:3.9-slim
 
-# 2. Install Chrome and its headless dependencies
+# Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       wget \
       gnupg \
       ca-certificates \
+      git \
       libglib2.0-0 \
       libnss3 \
       libatk1.0-0 \
@@ -17,9 +17,12 @@ RUN apt-get update && \
       libgbm1 \
       libxcomposite1 \
       libxrender1 \
-      libxfixes3 && \
+      libxfixes3 \
+      xvfb \
+      x11vnc \
+      fluxbox \
+      net-tools && \
     rm -rf /var/lib/apt/lists/* && \
-    # Add Google Chrome repo
     wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
     echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" \
       > /etc/apt/sources.list.d/google-chrome.list && \
@@ -28,14 +31,24 @@ RUN apt-get update && \
       google-chrome-stable && \
     rm -rf /var/lib/apt/lists/*
 
-# 3. Create app directory and copy code
+# Install noVNC
+RUN git clone https://github.com/novnc/noVNC.git /opt/novnc && \
+    git clone https://github.com/novnc/websockify /opt/novnc/utils/websockify
+
 WORKDIR /usr/src/app
 COPY . .
 
-# 4. Install Python deps (including webdriver_manager)
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Expose and launch
-EXPOSE 5000
+# Set environment variables
+ENV DISPLAY=:99
+ENV VNC_PORT=5900
+ENV NOVNC_PORT=6080
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "linkedin_bot:app"]
+# Expose ports
+EXPOSE 5000 5900 6080
+
+# Entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+CMD ["/entrypoint.sh"]
