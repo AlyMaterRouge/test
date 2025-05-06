@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://repostig-backend.onrender.com/api';
 const CALLBACK_PATH = '/linkedin-callback';
 
 export default function App() {
@@ -84,6 +84,10 @@ export default function App() {
     }
   };
 
+  const openVnc = () => {
+    window.open(`https://repostig-backend.onrender.com/vnc/vnc.html?host=repostig-backend.onrender.com&port=443&path=vnc/websockify&encrypt=1`, '_blank');
+  };
+
   return (
     <div style={{ padding: 20 }}>
       <h1>LinkedIn Bot Control</h1>
@@ -134,6 +138,7 @@ export default function App() {
           <button onClick={handleStopBot} disabled={status !== 'running'}>
             Stop Bot
           </button>
+          <button onClick={openVnc}>Open Manual Login</button>;
         </div>
       )}
     </div>
