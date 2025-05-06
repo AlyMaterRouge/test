@@ -15,7 +15,7 @@ http {
   }
 
   upstream novnc_upstream {
-    server 127.0.0.1:6080;
+    server 127.0.0.1:10000;
     keepalive 32;
   }
 
