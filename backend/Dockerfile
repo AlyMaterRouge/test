@@ -11,7 +11,9 @@ RUN apt-get update && \
     wget \
     nginx \
     gettext-base \
-    # Added packages from your list
+    xauth \
+    x11-xkb-utils \
+    x11-utils \
     gnupg \
     ca-certificates \
     git \
@@ -37,14 +39,13 @@ RUN apt-get update && \
     libasound2 \
     libcups2 \
     && rm -rf /var/lib/apt/lists/* && \
-    # Chrome installation
     wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
     echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends google-chrome-stable \
     && rm -rf /var/lib/apt/lists/* \
     && rm /etc/apt/sources.list.d/google-chrome.list
-
+    
 # Install noVNC (preserved original)
 RUN mkdir -p /opt/novnc && \
     wget -qO- https://github.com/novnc/noVNC/archive/refs/tags/v1.3.0.tar.gz | \
