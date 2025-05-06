@@ -49,6 +49,7 @@ RUN apt-get update && \
     && rm /etc/apt/sources.list.d/google-chrome.list
     
 # Install noVNC (preserved original)
+COPY vnc.html /opt/novnc/vnc.html
 RUN mkdir -p /opt/novnc && \
     wget -qO- https://github.com/novnc/noVNC/archive/refs/tags/v1.3.0.tar.gz | \
     tar xz --strip 1 -C /opt/novnc
