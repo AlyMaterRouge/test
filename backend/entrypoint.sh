@@ -5,24 +5,30 @@ set -euo pipefail
 echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] Generating nginx.conf..."
 envsubst '${PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
-# X11 Setup
+# X11 Configuration
 export DISPLAY=:99
-export XAUTHORITY=/tmp/.Xauthority
+export XAUTHORITY=/tmp/.Xauth
 rm -f /tmp/.X11-unix/X99 2>/dev/null || true
 
-# Generate X authority
-touch $XAUTHORITY
-xauth generate $DISPLAY . trusted
-
-# Start Xvfb with proper locking
+# Start Xvfb first with explicit auth
 echo "Starting Xvfb..."
-Xvfb $DISPLAY -screen 0 1920x1080x24 -ac +extension GLX +render -noreset -nolisten tcp &
+Xvfb $DISPLAY -screen 0 1920x1080x24 -ac +extension GLX +render -noreset -auth $XAUTHORITY &
 
-# Wait for X server
-while ! xdpyinfo -display $DISPLAY >/dev/null 2>&1; do
-    echo "Waiting for X server..."
-    sleep 1
+# Wait for X server to be ready
+echo "Waiting for X server..."
+while [ ! -e /tmp/.X11-unix/X99 ]; do
+    sleep 0.1
 done
+until xdpyinfo -display $DISPLAY >/dev/null 2>&1; do
+    echo "X server not ready yet..."
+    sleep 0.5
+done
+
+# Generate X authority file
+echo "Configuring X auth..."
+touch $XAUTHORITY
+xauth add $DISPLAY . $(mcookie)
+xauth generate $DISPLAY . trusted
 
 # Start window manager
 echo "Starting fluxbox..."
