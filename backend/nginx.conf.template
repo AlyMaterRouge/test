@@ -31,29 +31,26 @@ http {
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 
-    # VNC WebSocket endpoint
-    location /vnc/ {
-      proxy_pass http://novnc_upstream;
-      proxy_http_version 1.1;
-      proxy_set_header Upgrade $http_upgrade;
-      proxy_set_header Connection "upgrade";
-      proxy_set_header Host $host;
+  
+location /vnc/ {
+    # Serve static files first
+    alias /opt/novnc/;
+    index vnc.html;
+    try_files $uri $uri/ @websockify;
+}
 
-      # Timeout settings
-      proxy_connect_timeout 7d;
-      proxy_send_timeout 7d;
-      proxy_read_timeout 7d;
-    }
-
-    # noVNC static files
-    location /vnc/vnc.html {
-      alias /opt/novnc/vnc.html;
-    }
-
-    location /vnc/ {
-      alias /opt/novnc/;
-      index vnc.html;
-    }
+location @websockify {
+    # Proxy WebSocket requests
+    proxy_pass http://novnc_upstream;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    
+    proxy_connect_timeout 7d;
+    proxy_send_timeout 7d;
+    proxy_read_timeout 7d;
+}
 
     # Default 404
     location / {
