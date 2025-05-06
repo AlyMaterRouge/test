@@ -28,37 +28,20 @@ COPY . .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt flask-cors gunicorn
 
-# Configure NGINX reverse proxy using echo statements
-RUN rm /etc/nginx/sites-enabled/default && \
-    echo 'server {' > /etc/nginx/conf.d/reverse.conf && \
-    echo '    listen 80;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '    # Proxy API requests to Flask' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '    location /api/ {' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        rewrite ^/api/(.*)$ /$1 break;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        proxy_pass http://127.0.0.1:5000;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        proxy_http_version 1.1;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        proxy_set_header Host $host;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '    }' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '    # Serve noVNC client and proxy WebSocket connections' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '    location /vnc/ {' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        proxy_pass http://127.0.0.1:6080/;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        proxy_http_version 1.1;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        proxy_set_header Upgrade $http_upgrade;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        proxy_set_header Connection "upgrade";' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '    }' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '    # Fallback for other paths' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '    location / {' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '        return 404;' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '    }' >> /etc/nginx/conf.d/reverse.conf && \
-    echo '}' >> /etc/nginx/conf.d/reverse.conf
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends nginx && \
+    rm -rf /var/lib/apt/lists/*
 
-# Expose port 80 for HTTP
-EXPOSE 5000
+# Copy your app
+WORKDIR /usr/src/app
+COPY . .
 
-# Copy and set entrypoint
+# Install Python deps
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy Nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Ensure entrypoint is executable
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
-CMD ["/entrypoint.sh"]
