@@ -55,7 +55,7 @@ RUN rm /etc/nginx/sites-enabled/default && \
     echo '}' >> /etc/nginx/conf.d/reverse.conf
 
 # Expose port 80 for HTTP
-EXPOSE 80
+EXPOSE 5000
 
 # Copy and set entrypoint
 COPY entrypoint.sh /entrypoint.sh
