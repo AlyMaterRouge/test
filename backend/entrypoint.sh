@@ -1,27 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] Starting entrypoint.sh..."
+echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] entrypoint.sh: generating nginx.conf from template…"
+# Substitute only the PORT variable into our template
+envsubst '${PORT}' \
+  < /etc/nginx/nginx.conf.template \
+  > /etc/nginx/nginx.conf
 
-# 1. Start Xvfb for headless Chrome
-echo "[$(date +'%H:%M:%S')] Launching Xvfb..."
+echo "[$(date +'%H:%M:%S')] entrypoint.sh: testing nginx config…"
+nginx -t
+
+echo "[$(date +'%H:%M:%S')] entrypoint.sh: starting nginx…"
+# Use the nginx binary directly so it stays running in the background
+nginx
+
+echo "[$(date +'%H:%M:%S')] entrypoint.sh: launching services…"
+
+# Start Xvfb
 Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset &
-
-# 2. Start window manager
-echo "[$(date +'%H:%M:%S')] Launching Fluxbox..."
 fluxbox &
 
-# 3. Start VNC server
-echo "[$(date +'%H:%M:%S')] Launching x11vnc on :99..."
+# VNC + noVNC
 x11vnc -forever -shared -nopw -display :99 &
+/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 --heartbeat 10 &
 
-# 4. Start noVNC web client internally on port 6080
-echo "[$(date +'%H:%M:%S')] Launching noVNC proxy on 6080..."
-/opt/novnc/utils/novnc_proxy \
-  --vnc localhost:5900 \
-  --listen 6080 \
-  --heartbeat 10 &
-
-# 5. Start Gunicorn bound to localhost:5000
-echo "[$(date +'%H:%M:%S')] Launching Gunicorn..."
+# Finally, run Gunicorn in the foreground (PID 1)
 exec gunicorn -w 4 -b 127.0.0.1:5000 linkedin_bot:app
