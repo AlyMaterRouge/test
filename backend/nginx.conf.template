@@ -9,39 +9,53 @@ http {
   include       mime.types;
   default_type  application/octet-stream;
 
+  # Upstream services
   upstream flask_upstream {
     server 127.0.0.1:5000;
   }
 
   upstream novnc_upstream {
     server 127.0.0.1:6080;
-    keepalive 32;  # Added keepalive
+    keepalive 32;
   }
 
   server {
-    listen  ${PORT}   default_server;
-    server_name       _;
+    listen ${PORT} default_server;
+    server_name _;
 
+    # Flask API endpoint
     location /api/ {
-      proxy_pass         http://flask_upstream;
-      proxy_set_header   Host              $host;
-      proxy_set_header   X-Real-IP         $remote_addr;
-      proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+      proxy_pass http://flask_upstream;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # VNC WebSocket endpoint
+    location /vnc/ {
+      proxy_pass http://novnc_upstream;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_set_header Host $host;
+
+      # Timeout settings
+      proxy_connect_timeout 7d;
+      proxy_send_timeout 7d;
+      proxy_read_timeout 7d;
+    }
+
+    # noVNC static files
+    location /vnc/vnc.html {
+      alias /opt/novnc/vnc.html;
     }
 
     location /vnc/ {
-      proxy_http_version 1.1;
-      proxy_set_header   Upgrade           $http_upgrade;
-      proxy_set_header   Connection        "upgrade";
-      
-      # Timeout settings
-      proxy_connect_timeout 300;
-      proxy_send_timeout    300;
-      proxy_read_timeout    300;
-      
-      proxy_pass         http://novnc_upstream;
+      alias /opt/novnc/;
+      index vnc.html;
     }
 
+    # Default 404
     location / {
       return 404;
     }
