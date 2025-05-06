@@ -84,6 +84,10 @@ export default function App() {
     }
   };
 
+  const openVnc = () => {
+    window.open(`http://${window.location.hostname}:6080/vnc.html`, '_blank');
+  };
+
   return (
     <div style={{ padding: 20 }}>
       <h1>LinkedIn Bot Control</h1>
