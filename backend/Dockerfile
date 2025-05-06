@@ -1,6 +1,6 @@
 FROM python:3.9-slim
 
-# Install system dependencies
+# Install system dependencies including gettext (contains envsubst)
 RUN apt-get update && apt-get install -y \
     xvfb \
     fluxbox \
@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     websockify \
     wget \
     nginx \
+    gettext-base \ 
     && rm -rf /var/lib/apt/lists/*
 
 # Install noVNC
@@ -28,11 +29,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Set permissions
 RUN chmod +x entrypoint.sh
 
-# Required ports:
-# - 5900 (VNC)
-# - 6080 (noVNC)
-# - 5000 (Flask)
-# - ${PORT} (Nginx - Render's port)
 EXPOSE ${PORT}
 
 ENTRYPOINT ["./entrypoint.sh"]
