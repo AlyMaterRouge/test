@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>noVNC</title>
+    <meta charset="utf-8">
+    <script type="text/javascript">
+        // Set default WebSocket path
+        // In your custom vnc.html
+UI.connectButton.onclick = function() {
+    UI.connect(
+        window.location.hostname,
+        window.location.port || (window.location.protocol === 'https:' ? 443 : 80),
+        'vnc/websockify',  // Critical path change
+        document.getElementById('password').value
+    );
+    return false;
+};
+    </script>
+    <script type="text/javascript" src="vnc.js"></script>
+</head>
+<body>
+    <!-- Keep original noVNC UI elements -->
+    <div id="noVNC_screen"></div>
+</body>
+</html>
