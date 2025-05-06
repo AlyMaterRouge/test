@@ -40,7 +40,7 @@ x11vnc -forever -shared -nopw -display $DISPLAY -rfbport 5900 -auth $XAUTHORITY 
 
 # Start noVNC
 echo "Starting noVNC..."
-/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 --heartbeat 10 &
+/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 10000 --heartbeat 10 &
 
 # Start Nginx
 echo "Starting Nginx..."
