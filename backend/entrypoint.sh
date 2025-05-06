@@ -1,36 +1,42 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Generate nginx config first
+# Generate nginx config
 echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] Generating nginx.conf..."
 envsubst '${PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
-# Start Xvfb with display :99
+# X11 Setup
+export DISPLAY=:99
+export XAUTHORITY=/tmp/.Xauthority
+rm -f /tmp/.X11-unix/X99 2>/dev/null || true
+
+# Generate X authority
+touch $XAUTHORITY
+xauth generate $DISPLAY . trusted
+
+# Start Xvfb with proper locking
 echo "Starting Xvfb..."
-Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset &
+Xvfb $DISPLAY -screen 0 1920x1080x24 -ac +extension GLX +render -noreset -nolisten tcp &
 
-# Wait for Xvfb to initialize
-sleep 2
+# Wait for X server
+while ! xdpyinfo -display $DISPLAY >/dev/null 2>&1; do
+    echo "Waiting for X server..."
+    sleep 1
+done
 
-# Start fluxbox window manager
+# Start window manager
 echo "Starting fluxbox..."
 fluxbox &
 
 # Start VNC server
 echo "Starting x11vnc..."
-x11vnc -forever -shared -nopw -display :99 -rfbport 5900 &
+x11vnc -forever -shared -nopw -display $DISPLAY -rfbport 5900 -auth $XAUTHORITY &
 
-# Wait for VNC server to start
-sleep 1
-
-# Start noVNC proxy (WebSocket -> VNC)
+# Start noVNC
 echo "Starting noVNC..."
-/opt/novnc/utils/novnc_proxy \
-    --vnc localhost:5900 \
-    --listen 6080 \
-    --heartbeat 10 &
+/opt/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 --heartbeat 10 &
 
-# Start Nginx after services
+# Start Nginx
 echo "Starting Nginx..."
 nginx
 
