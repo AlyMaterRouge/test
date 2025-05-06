@@ -29,8 +29,10 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt flask-cors gunicorn
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends nginx && \
-    rm -rf /var/lib/apt/lists/*
+     apt-get install -y --no-install-recommends \
+       nginx \
+       gettext-base \
+     && rm -rf /var/lib/apt/lists/*
 
 # Copy your app
 WORKDIR /usr/src/app
@@ -39,8 +41,8 @@ COPY . .
 # Install Python deps
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy Nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copy Nginx template
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
 
 # Ensure entrypoint is executable
 COPY entrypoint.sh /entrypoint.sh
@@ -50,4 +52,4 @@ RUN chmod +x /entrypoint.sh
 EXPOSE ${PORT}
 
 # Start Nginx (so it listens on $PORT) then your services
-CMD service nginx start && /entrypoint.sh
+CMD /entrypoint.sh
