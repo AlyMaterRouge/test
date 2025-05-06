@@ -45,3 +45,9 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Ensure entrypoint is executable
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+# Expose only the Render-port
+EXPOSE ${PORT}
+
+# Start Nginx (so it listens on $PORT) then your services
+CMD service nginx start && /entrypoint.sh
