@@ -35,7 +35,7 @@ SCOPES = 'profile email w_member_social openid'# Scopes for LinkedIn API access
 
 VALID_STATES = set()
 
-@app.route('/start_oauth')
+@app.route('/api/start_oauth')
 def start_oauth():
     state = str(uuid.uuid4())
     VALID_STATES.add(state)
