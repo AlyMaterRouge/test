@@ -1,71 +1,54 @@
 FROM python:3.9-slim
 
-# Install system dependencies including gettext (contains envsubst)
+# Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    xvfb \
-    fluxbox \
-    x11vnc \
-    net-tools \
-    websockify \
-    wget \
-    nginx \
-    gettext-base \
-    xauth \
-    x11-xkb-utils \
-    x11-utils \
-    gnupg \
-    ca-certificates \
-    git \
-    libglib2.0-0 \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libgtk-3-0 \
-    libgbm1 \
-    libxcomposite1 \
-    libxrender1 \
-    libxfixes3 \
-    fonts-liberation \
-    libappindicator3-1 \
-    libnspr4 \
-    libdbus-1-3 \
-    libx11-xcb1 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxrandr2 \
-    libasound2 \
-    libcups2 \
-    util-linux \          
-    xserver-xorg-core \
-    && rm -rf /var/lib/apt/lists/* && \
+      wget \
+      gnupg \
+      ca-certificates \
+      git \
+      libglib2.0-0 \
+      libnss3 \
+      libatk1.0-0 \
+      libatk-bridge2.0-0 \
+      libpango-1.0-0 \
+      libpangocairo-1.0-0 \
+      libgtk-3-0 \
+      libgbm1 \
+      libxcomposite1 \
+      libxrender1 \
+      libxfixes3 \
+      xvfb \
+      x11vnc \
+      fluxbox \
+      net-tools && \
+    rm -rf /var/lib/apt/lists/* && \
     wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" \
+      > /etc/apt/sources.list.d/google-chrome.list && \
     apt-get update && \
-    apt-get install -y --no-install-recommends google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm /etc/apt/sources.list.d/google-chrome.list
-    
-# Install noVNC (preserved original)
-COPY vnc.html /opt/novnc/vnc.html
-RUN mkdir -p /opt/novnc && \
-    wget -qO- https://github.com/novnc/noVNC/archive/refs/tags/v1.3.0.tar.gz | \
-    tar xz --strip 1 -C /opt/novnc
+    apt-get install -y --no-install-recommends \
+      google-chrome-stable && \
+    rm -rf /var/lib/apt/lists/*
 
-# Preserved application setup
-COPY linkedin_bot.py .
-COPY requirements.txt .
-COPY nginx.conf.template /etc/nginx/
-COPY entrypoint.sh .
+# Install noVNC
+RUN git clone https://github.com/novnc/noVNC.git /opt/novnc && \
+    git clone https://github.com/novnc/websockify /opt/novnc/utils/websockify
 
-# Install Python dependencies (preserved)
+WORKDIR /usr/src/app
+COPY . .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Set permissions (preserved)
-RUN chmod +x entrypoint.sh
+# Set environment variables
+ENV DISPLAY=:99
+ENV VNC_PORT=5900
+ENV NOVNC_PORT=6080
 
-EXPOSE ${PORT}
+# Expose ports
+EXPOSE 5000 5900 6080
 
-ENTRYPOINT ["./entrypoint.sh"]
+# Entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+CMD ["/entrypoint.sh"]
