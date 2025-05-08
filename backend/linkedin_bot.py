@@ -17,7 +17,7 @@ app = Flask(__name__)
 # Allow your React dev server and (optionally) your production domain:
 CORS(
     app,
-    resources={r"/*": {"origins": ["http://localhost:3000", "https://repostig-backend.onrender.com"]}},
+    resources={r"/*": {"origins": ["https://linkedinrepostingf.vercel.app", "https://repostig-backend.onrender.com"]}},
     methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
     supports_credentials=False  # or True if you need cookies/auth headers
