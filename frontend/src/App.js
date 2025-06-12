@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
-const API_BASE = 'https://repostig-backend.onrender.com/api';
+const API_BASE = 'https://repostig-backend.onrender.com/';
 const CALLBACK_PATH = '/linkedin-callback';
 
 export default function App() {
