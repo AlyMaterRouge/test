@@ -16,10 +16,7 @@ from urllib.parse import quote_plus
 app = Flask(__name__)
 CORS(Add commentMore actions
     app,
-    resources={r"/*": {"origins": ["https://linkedinrepostingf.vercel.app", "https://repostig-backend.onrender.com"]}},
-    methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
-    supports_credentials=False  # or True if you need cookies/auth headers
+    resources={r"/*": {"origins": ["https://linkedinrepostingf.vercel.app", "https://repostig-backend.onrender.com"]}}
 )
 
 logging.basicConfig(level=logging.DEBUG)
