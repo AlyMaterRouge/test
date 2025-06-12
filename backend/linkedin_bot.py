@@ -14,7 +14,13 @@ from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import quote_plus
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(Add commentMore actions
+    app,
+    resources={r"/*": {"origins": ["https://linkedinrepostingf.vercel.app", "https://repostig-backend.onrender.com"]}},
+    methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+    supports_credentials=False  # or True if you need cookies/auth headers
+)
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -27,7 +33,7 @@ SCOPES = 'profile email w_member_social openid'# Scopes for LinkedIn API access
 
 VALID_STATES = set()
 
-@app.route('/start_oauth')
+@app.route('/api/start_oauth')
 def start_oauth():
     state = str(uuid.uuid4())
     VALID_STATES.add(state)
@@ -42,7 +48,7 @@ def start_oauth():
     logging.info(f"Generated auth URL: {auth_url}")
     return jsonify({'authUrl': auth_url})
 
-@app.route('/exchange_token', methods=['POST'])
+@app.route('/api/exchange_token', methods=['POST'])
 def exchange_token():
     data = request.json or {}
     code = data.get('code')
@@ -335,7 +341,7 @@ class BotManager:
         self.thread.join(timeout=5)
         return True
 
-@app.route('/start_bot', methods=['POST'])
+@app.route('/api/start_bot', methods=['POST'])
 def start_bot():
     data = request.json or {}
     access_token = data.get('access_token')
@@ -349,7 +355,7 @@ def start_bot():
     status_code = 200 if started else 409
     return jsonify({'started': started}), status_code
 
-@app.route('/stop_bot', methods=['POST'])
+@app.route('/api/stop_bot', methods=['POST'])
 def stop_bot():
     global manager
     if manager is None:
