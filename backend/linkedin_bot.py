@@ -14,10 +14,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import quote_plus
 
 app = Flask(__name__)
-CORS(Add commentMore actions
-    app,
-    resources={r"/*": {"origins": ["https://linkedinrepostingf.vercel.app", "https://repostig-backend.onrender.com"]}}
-)
+CORS(app, resources={r"/*": {"origins": ["https://linkedinrepostingf.vercel.app", "https://repostig-backend.onrender.com"]}})
 
 logging.basicConfig(level=logging.DEBUG)
 
